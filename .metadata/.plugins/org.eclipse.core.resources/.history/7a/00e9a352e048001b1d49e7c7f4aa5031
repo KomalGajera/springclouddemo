@@ -1,0 +1,11 @@
+package com.example.schoolservice.service;
+
+import javax.validation.Valid;
+
+import com.example.schoolservice.model.School;
+
+public interface SchoolService {
+
+	void save( School school);
+
+}

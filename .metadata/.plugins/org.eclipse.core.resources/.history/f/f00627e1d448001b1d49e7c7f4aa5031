@@ -1,0 +1,19 @@
+package com.example.schoolservice.model;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+
+public class School {
+	
+	@Column(name="id",nullable = false)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long id;
+	
+	@Column(name="schoolname",nullable = false)
+	private String name;
+	
+	@Column(name="city",nullable = false)
+	private String city;
+
+}

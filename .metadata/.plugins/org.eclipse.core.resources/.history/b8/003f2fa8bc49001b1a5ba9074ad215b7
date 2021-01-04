@@ -1,0 +1,128 @@
+package com.example.schoolservice.controller;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import com.example.schoolservice.dto.APIResponse;
+import com.example.schoolservice.model.School;
+import com.example.schoolservice.service.SchoolService;
+import com.google.common.reflect.TypeToken;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
+import lombok.extern.slf4j.Slf4j;
+
+@RestController
+@Slf4j
+@RequestMapping("/school")
+@Validated
+public class SchoolController {
+	
+	@Autowired
+	private MessageSource messages;
+
+	@Autowired
+	private ModelMapper modelMapper;
+	
+	@Autowired
+	private SchoolService schoolService;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	@Autowired
+	private KafkaTemplate<String, School> kafkaTemplate;
+	
+	private static final String TOPIC = "SchoolTopic";
+	
+	@PostMapping("/addschool")
+	public ResponseEntity<APIResponse> addSchool(@RequestBody @Valid School school) {
+
+		log.info("start to save school data...");
+		School school2=schoolService.save(school);
+		kafkaTemplate.send(TOPIC,school2);
+		log.info("school save successfully..");
+		return ResponseEntity.status(HttpStatus.OK).body(new APIResponse(HttpStatus.OK.value(), true,
+				messages.getMessage("school save sucessfully", null, LocaleContextHolder.getLocale()), null));
+
+	}
+
+	@SuppressWarnings("serial")
+	@GetMapping("/getschool")
+	public ResponseEntity<APIResponse> getSchool() {
+		log.info("fetch school data...");
+		List<School> schools = schoolService.getSchool();
+		log.info("fetch school data successfully");
+		return ResponseEntity.status(HttpStatus.OK).body(new APIResponse(HttpStatus.OK.value(), true, null,
+				modelMapper.map(schools, new TypeToken<List<School>>() {
+				}.getType())));
+	}
+	
+	@DeleteMapping("/deleteschool/{id}")
+	@HystrixCommand(fallbackMethod = "calldeleteschoolwithstudent")
+	public ResponseEntity<APIResponse> deleteSchool(@PathVariable Long id){
+		log.info("delete school data");
+		
+		restTemplate.exchange("http://student-service/student/getstudentbyid/{studentid}", HttpMethod.GET, null,
+				new ParameterizedTypeReference<String>() {
+				}, id).getBody();
+		return ResponseEntity.status(HttpStatus.OK).body(new APIResponse(HttpStatus.OK.value(), true,
+				messages.getMessage("Sorry you can not delete school", null, LocaleContextHolder.getLocale()), null));
+	}
+	
+	@SuppressWarnings("unused")
+	private ResponseEntity<APIResponse> calldeleteschoolwithstudent(@PathVariable Long id) {
+		schoolService.deleteSchool(id);
+		return ResponseEntity.status(HttpStatus.OK).body(new APIResponse(HttpStatus.OK.value(), true,
+				messages.getMessage("delete school sucessfully", null, LocaleContextHolder.getLocale()), null));
+	}
+
+	@PostMapping("/updateschool/")
+	public ResponseEntity<APIResponse> updateStudent(@RequestBody @Valid School school) {
+
+		log.info("start to update school data...");
+		schoolService.save(school);
+		log.info("school update successfully..");
+		return ResponseEntity.status(HttpStatus.OK).body(new APIResponse(HttpStatus.OK.value(), true,
+				messages.getMessage("school update sucessfully", null, LocaleContextHolder.getLocale()), null));
+
+	}
+	
+	@GetMapping("/getschoolbyid/{id}")
+	public ResponseEntity<APIResponse> getSchoolById(@PathVariable long id) {
+		log.info("fetch school data...");
+		School school = schoolService.getSchoolByid(id);
+		log.info("fetch school data successfully");
+		return ResponseEntity.ok(new APIResponse(HttpStatus.OK.value(), true,
+				this.messages.getMessage("get school success", null, LocaleContextHolder.getLocale()), school));
+	}
+	
+	
+
+	
+
+}

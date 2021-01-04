@@ -1,0 +1,16 @@
+package com.example.schoolservice.service;
+
+import org.springframework.stereotype.Service;
+
+import com.example.schoolservice.model.School;
+
+@Service
+public class SchoolServiceImpl implements SchoolService {
+
+	@Override
+	public void save(School school) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

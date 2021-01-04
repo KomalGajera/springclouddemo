@@ -1,0 +1,5 @@
+package com.example.studentservice.exception;
+
+public class SchoolNotFoundException {
+
+}

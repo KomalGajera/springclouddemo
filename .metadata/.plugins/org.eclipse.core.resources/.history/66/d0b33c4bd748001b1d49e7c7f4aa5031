@@ -1,0 +1,5 @@
+package com.example.schoolservice.service;
+
+public class SchoolServiceImpl implements SchoolService {
+
+}

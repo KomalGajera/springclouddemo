@@ -1,0 +1,97 @@
+package com.example.studentservice.exception;
+
+import java.util.stream.Collectors;
+
+import javax.validation.ConstraintViolationException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mail.MailException;
+import org.springframework.messaging.MessagingException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.example.studentservice.dto.APIResponse;
+
+@ControllerAdvice
+public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+	@Autowired
+	private MessageSource messages;
+
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+			org.springframework.http.HttpHeaders headers, HttpStatus status, WebRequest request) {
+		// TODO Auto-generated method stub
+		String data = ex.getBindingResult().getAllErrors().stream().map(
+				error -> this.messages.getMessage(error.getDefaultMessage(), null, LocaleContextHolder.getLocale()))
+				.collect(Collectors.joining(","));
+
+		return ResponseEntity.status(HttpStatus.OK).body(new APIResponse(status.value(), false, data));
+	}	
+
+	@ExceptionHandler(value = { StudentExitsException.class,StudentNotFoundexception.class  })
+	protected ResponseEntity<APIResponse> handleUserNotFoundException(RuntimeException ex, WebRequest request) {
+		return ResponseEntity.ok(new APIResponse(HttpStatus.NOT_FOUND.value(), false,
+				this.messages.getMessage(ex.getMessage(), null, LocaleContextHolder.getLocale())));
+	}
+
+	@ExceptionHandler(value = {  })
+	protected ResponseEntity<APIResponse> handleBadRequest(RuntimeException ex, WebRequest request) {
+		return ResponseEntity.ok(new APIResponse(HttpStatus.BAD_REQUEST.value(), false,
+				this.messages.getMessage(ex.getMessage(), null, LocaleContextHolder.getLocale())));
+	}
+	
+	@ExceptionHandler(value = { MessagingException.class, MailException.class })
+	protected ResponseEntity<APIResponse> handleMailException(RuntimeException ex, WebRequest request) {
+		return ResponseEntity.ok(new APIResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), false,
+				this.messages.getMessage("mail.send.fail", null, LocaleContextHolder.getLocale())));
+	}
+
+
+	@ExceptionHandler(value = { ConstraintViolationException.class})
+	protected ResponseEntity<APIResponse> handleConstraintViolationException(RuntimeException ex, WebRequest request) {
+		String msg = "";
+		if (null != ex.getMessage() && !"".equals(ex.getMessage())) {
+			if (ex.getMessage().contains(":")) {
+				if (ex.getMessage().contains("{") && ex.getMessage().contains("}")) {
+					msg = ex.getMessage()
+							.substring(ex.getMessage().trim().indexOf('{') + 1, ex.getMessage().trim().lastIndexOf('}'))
+							.trim();
+				} else {
+					msg = ex.getMessage().substring(ex.getMessage().indexOf(':') + 1).trim();
+				}
+			} else {
+				msg = ex.getMessage();
+			}
+		}
+		return ResponseEntity.ok(new APIResponse(HttpStatus.BAD_REQUEST.value(), false,
+				this.messages.getMessage(msg, null, LocaleContextHolder.getLocale())));
+	}
+
+	
+	@Override
+	protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+			org.springframework.http.HttpHeaders headers, HttpStatus status, WebRequest request) {
+		// TODO Auto-generated method stub
+		return ResponseEntity
+				.ok(new APIResponse(HttpStatus.BAD_REQUEST.value(), false, ex.getParameterName() + " is required"));
+	}
+
+	@Override
+	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+			org.springframework.http.HttpHeaders headers, HttpStatus status, WebRequest request) {
+		// TODO Auto-generated method stub
+		return ResponseEntity.ok(new APIResponse(HttpStatus.BAD_REQUEST.value(), false,
+				this.messages.getMessage("invalid.input.global.msg", null, LocaleContextHolder.getLocale())));
+	}
+
+}

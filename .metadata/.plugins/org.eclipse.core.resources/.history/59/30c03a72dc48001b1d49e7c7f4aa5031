@@ -1,0 +1,9 @@
+package com.example.studentservice.service;
+
+import com.example.studentservice.model.Student;
+
+public interface StudentService {
+
+	void save(Student student);
+
+}

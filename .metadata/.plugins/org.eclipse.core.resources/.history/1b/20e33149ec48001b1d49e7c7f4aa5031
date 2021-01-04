@@ -1,0 +1,41 @@
+package com.example.schoolservice.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.schoolservice.model.School;
+import com.example.schoolservice.repository.SchoolRepository;
+
+@Service
+public class SchoolServiceImpl implements SchoolService {
+	
+	@Autowired
+	SchoolRepository repo;
+
+	@Override
+	public void save(School school) {
+		// TODO Auto-generated method stub
+		repo.save(school);
+	}
+
+	@Override
+	public List<School> getSchool() {
+		// TODO Auto-generated method stub
+		return repo.findAll();
+	}
+
+	@Override
+	public void deleteSchool(Long id) {
+		// TODO Auto-generated method stub
+		repo.deleteById(id);
+	}
+
+	@Override
+	public School getSchoolByid(long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

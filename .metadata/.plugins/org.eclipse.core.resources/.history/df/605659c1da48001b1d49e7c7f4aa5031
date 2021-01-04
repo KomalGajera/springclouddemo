@@ -1,0 +1,11 @@
+package com.example.studentservice.service;
+
+import javax.validation.Valid;
+
+import com.example.studentservice.model.Student;
+
+public interface StudentService {
+
+	void save(Student student);
+
+}

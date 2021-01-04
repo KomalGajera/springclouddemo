@@ -1,0 +1,5 @@
+package com.example.schoolservice.config;
+
+public class ApllicationConfig {
+
+}

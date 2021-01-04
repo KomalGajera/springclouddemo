@@ -1,0 +1,5 @@
+package com.example.schoolservice.exception;
+
+public class RestResponseEntityExceptionHandler {
+
+}

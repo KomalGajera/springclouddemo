@@ -1,0 +1,21 @@
+package com.example.schoolservice.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.schoolservice.model.School;
+import com.example.schoolservice.repository.SchoolRepository;
+
+@Service
+public class SchoolServiceImpl implements SchoolService {
+	
+	@Autowired
+	SchoolRepository repo;
+
+	@Override
+	public void save(School school) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

@@ -1,0 +1,16 @@
+package com.example.studentservice.service;
+
+import org.springframework.stereotype.Service;
+
+import com.example.studentservice.model.Student;
+
+@Service
+public class StudentServiceImpl implements StudentService {
+
+	@Override
+	public void save(Student student) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

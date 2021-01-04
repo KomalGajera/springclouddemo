@@ -1,0 +1,26 @@
+package com.example.studentservice.exception;
+
+public class StudentExitsException extends RuntimeException {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public StudentExitsException() {
+		super();
+	}
+
+	public StudentExitsException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public StudentExitsException(String message) {
+		super(message);
+	}
+
+	public StudentExitsException(Throwable cause) {
+		super(cause);
+	}
+
+}

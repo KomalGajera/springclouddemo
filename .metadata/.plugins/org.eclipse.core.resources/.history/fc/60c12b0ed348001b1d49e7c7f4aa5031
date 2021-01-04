@@ -1,0 +1,22 @@
+package com.example.studentservice.model;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+@Entity
+@Table(name = "student")
+public class Student {
+	
+	private long id;
+	private String fname;
+	private String lname;
+	private String phoneNumber;
+	private long schoolid;
+	
+
+}
